@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"streaming_demo/database"
+	"streaming_demo/models"
 )
 
 func main() {
 	database.InitDB()
-	var records []database.Record
+	var records []models.Record
 	startDate := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
 	for i := 0; i < 100000; i++ {
 		// Tạo ngày ngẫu nhiên trong khoảng 2 năm
@@ -17,7 +18,7 @@ func main() {
 		createAt := startDate.Add(daysOffset)
 		updateAt := createAt.Add(time.Duration(i%30) * 24 * time.Hour) // Cập nhật trong 30 ngày sau
 
-		record := database.Record{
+		record := models.Record{
 			Keyword:  fmt.Sprintf("keyword%d", i),
 			Node:     fmt.Sprintf("node%d", i),
 			CreateAd: createAt,
@@ -25,12 +26,12 @@ func main() {
 		}
 		records = append(records, record)
 		if len(records) == 1000 { // Chèn theo lô 1000 bản ghi để tăng hiệu suất
-			database.DB.Create(&records)
+			database.DB.Db.Create(&records)
 			records = records[:0] // Reset slice
 		}
 	}
 	if len(records) > 0 {
-		database.DB.Create(&records)
+		database.DB.Db.Create(&records)
 	}
 	fmt.Println("Inserted 100,000 records successfully")
 }
